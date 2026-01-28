@@ -1,0 +1,33 @@
+Date,Description,Amount,Type,Balance,Transaction ID,Merchant Name,Location,DR/CR
+2025-05-01,Food from Swiggy,-120.50,Debit,879.50,TXN001,Swiggy,Mumbai,DR
+2025-05-02,Uber ride to work,-250.00,Debit,629.50,TXN002,Uber,Bangalore,DR
+2025-05-03,Daily groceries,-320.00,Debit,309.50,TXN023,Local Store,Mumbai,DR
+2025-05-04,Shopping spree on Amazon,-2000.00,Debit,-1690.50,TXN003,Amazon,Online,DR
+2025-05-05,Salary credit from XYZ Corp,12000.00,Credit,10309.50,TXN004,XYZ Corp,Delhi,CR
+2025-05-06,Cafe coffee with friends,-250.00,Debit,10059.50,TXN024,Cafe Coffee Day,Pune,DR
+2025-05-07,Electricity bill payment,-450.00,Debit,9609.50,TXN005,Electricity Co.,Mumbai,DR
+2025-05-08,Starbucks coffee,-100.00,Debit,9509.50,TXN006,Starbucks,Delhi,DR
+2025-05-09,Mobile recharge,-199.00,Debit,9310.50,TXN025,Jio,Online,DR
+2025-05-10,Ordered lunch on Zomato,-350.00,Debit,8960.50,TXN007,Zomato,Delhi,DR
+2025-05-11,Vegetable market,-180.00,Debit,8780.50,TXN026,Local Vendor,Delhi,DR
+2025-05-12,ATM withdrawal from ICICI,-2000.00,Debit,6780.50,TXN008,ICICI Bank,Delhi,DR
+2025-05-13,Mobile bill payment,-250.00,Debit,6530.50,TXN009,Airtel,Delhi,DR
+2025-05-14,Petrol refill,-1000.00,Debit,5530.50,TXN027,HP Petrol Pump,Mumbai,DR
+2025-05-15,Another Swiggy food order,-200.00,Debit,5330.50,TXN010,Swiggy,Hyderabad,DR
+2025-05-16,Snacks from local shop,-75.00,Debit,5255.50,TXN028,Local Store,Hyderabad,DR
+2025-05-17,Reimbursement from ABC Corp,1000.00,Credit,6255.50,TXN011,ABC Corp,Chennai,CR
+2025-05-18,Netflix monthly subscription,-199.00,Debit,6056.50,TXN012,Netflix,Online,DR
+2025-05-19,Laundry service,-300.00,Debit,5756.50,TXN029,QuickWash,Mumbai,DR
+2025-05-20,Train ticket IRCTC,-600.00,Debit,5156.50,TXN013,IRCTC,Hyderabad,DR
+2025-05-21,Fast food dinner,-240.00,Debit,4916.50,TXN030,Domino's,Bangalore,DR
+2025-05-22,Freelance payment from ClientX,5000.00,Credit,9916.50,TXN014,ClientX,Bangalore,CR
+2025-05-23,Book purchase,-420.00,Debit,9496.50,TXN031,Crossword,Online,DR
+2025-05-24,Myntra clothing haul,-1800.00,Debit,7696.50,TXN015,Myntra,Online,DR
+2025-05-25,Flight booking on Indigo,-3000.00,Debit,4696.50,TXN016,Indigo,Online,DR
+2025-05-26,Paytm electricity recharge,-550.00,Debit,4146.50,TXN032,Paytm,Delhi,DR
+2025-05-27,DMart grocery shopping,-600.00,Debit,3546.50,TXN017,DMart,Mumbai,DR
+2025-05-28,Groww investment SIP,-1000.00,Debit,2546.50,TXN018,Groww,Online,DR
+2025-05-29,Hotstar annual subscription,-899.00,Debit,1647.50,TXN019,Hotstar,Online,DR
+2025-05-30,BigBasket essentials,-550.00,Debit,1097.50,TXN020,BigBasket,Bangalore,DR
+2025-05-31,PharmEasy medicine order,-300.00,Debit,797.50,TXN021,PharmEasy,Online,DR
+2025-06-01,Udemy course purchase,-449.00,Debit,348.50,TXN022,Udemy,Online,DR

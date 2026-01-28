@@ -1,0 +1,12 @@
+Date,Description,Amount,Type,Category,Balance,Transaction ID,Merchant Name,Location
+2025-05-01,Food from Swiggy,-120.50,Debit,Food,879.50,TXN001,Swiggy,Mumbai
+2025-05-02,Uber ride to work,-250.00,Debit,Travel,629.50,TXN002,Uber,Bangalore
+2025-05-02,Shopping spree on Amazon,-2000.00,Debit,Shopping,429.50,TXN003,Amazon,Online
+2025-05-03,Salary credit from XYZ Corp,5000.00,Credit,Income,5429.50,TXN004,XYZ Corp,Delhi
+2025-05-04,Electricity bill payment,-450.00,Debit,Bills,4979.50,TXN005,Electricity Co.,Mumbai
+2025-05-04,Starbucks coffee,-100.00,Debit,Food,4879.50,TXN006,Starbucks,Delhi
+2025-05-05,Ordered lunch on Zomato,-350.00,Debit,Food,4529.50,TXN007,Zomato,Delhi
+2025-05-06,ATM withdrawal from ICICI,-2000.00,Debit,ATM Withdrawal,2529.50,TXN008,ICICI Bank,Delhi
+2025-05-07,Mobile bill payment,-250.00,Debit,Bills,2279.50,TXN009,Airtel,Delhi
+2025-05-07,Another Swiggy food order,-200.00,Debit,Food,2079.50,TXN010,Swiggy,Hyderabad
+2025-05-08,Reimbursement from ABC Corp,1000.00,Credit,Income,3079.50,TXN011,ABC Corp,Chennai
