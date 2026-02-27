@@ -1,11 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuth } from "@/contexts/SimpleAuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useSimpleAuth();
 
   const handleSignOut = async () => {
     await signOut();
@@ -39,9 +39,16 @@ const Navbar = () => {
               </Button>
               <Button 
                 variant="ghost" 
-                onClick={() => navigate("/results")}
+                onClick={() => navigate("/nudge")}
+                className="text-yellow-600 hover:text-yellow-700"
               >
-                Results
+                💡 Budget Nudge
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate("/chatbot")}
+              >
+                Chatbot
               </Button>
               <Button 
                 variant="outline" 

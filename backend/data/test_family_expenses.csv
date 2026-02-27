@@ -1,0 +1,34 @@
+Date,Description,Amount,DR/CR
+2024-02-01,Salary Credit,85000,CR
+2024-02-01,Spouse Salary Credit,65000,CR
+2024-02-02,Home Loan EMI,35000,DR
+2024-02-03,School Fees - Kid 1,8500,DR
+2024-02-03,School Fees - Kid 2,8500,DR
+2024-02-04,DMart Monthly Shopping,5500,DR
+2024-02-05,Electricity Bill,2800,DR
+2024-02-05,Water Bill,650,DR
+2024-02-06,Gas Cylinder,1200,DR
+2024-02-07,Swiggy Family Dinner,1800,DR
+2024-02-08,Petrol Pump,3500,DR
+2024-02-09,Kids Tuition Fees,6000,DR
+2024-02-10,Zomato Weekend Lunch,2200,DR
+2024-02-11,BigBasket Groceries,3800,DR
+2024-02-12,Netflix Family Plan,649,DR
+2024-02-12,Amazon Prime,299,DR
+2024-02-12,Hotstar Subscription,499,DR
+2024-02-13,Pharmacy Medicine,1850,DR
+2024-02-14,Restaurant Family Dinner,3500,DR
+2024-02-15,Mobile Recharge - Self,599,DR
+2024-02-15,Mobile Recharge - Spouse,599,DR
+2024-02-16,Kids School Supplies,2400,DR
+2024-02-17,Car Insurance Premium,8500,DR
+2024-02-18,Swiggy Order,1200,DR
+2024-02-19,Vegetable Market,850,DR
+2024-02-20,Kids Birthday Party,5500,DR
+2024-02-21,Myntra Clothes Shopping,6800,DR
+2024-02-22,Doctor Consultation,1500,DR
+2024-02-23,Zomato Dinner,1600,DR
+2024-02-24,Petrol Pump,3200,DR
+2024-02-25,DMart Groceries,4200,DR
+2024-02-26,Kids Activity Classes,4000,DR
+2024-02-27,Swiggy Weekend Order,1900,DR

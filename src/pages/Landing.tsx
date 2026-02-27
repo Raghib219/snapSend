@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuth } from "@/contexts/SimpleAuthContext";
 import { useEffect, useRef } from "react";
 import FloatingIllustration from "@/components/FloatingIllustration";
 import { ArrowRight, BarChart3, Upload, FileText } from "lucide-react";
@@ -9,7 +9,7 @@ import Navbar from "@/components/Navbar";
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useSimpleAuth();
   
   useEffect(() => {
     const observer = new IntersectionObserver(

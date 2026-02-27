@@ -26,19 +26,23 @@ export default function FinancialChatbot() {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      console.log("💬 Asking chatbot:", userQuestion);
+      
       const response = await axios.post(`${apiUrl}/ask-question`, {
         question: userQuestion,
       });
 
       const newAnswer = response.data.answer;
+      console.log("✅ Chatbot response received");
       setChatHistory((prev) => [...prev, { question: userQuestion, answer: newAnswer }]);
-    } catch (error) {
-      console.error("Chat error:", error);
+    } catch (error: any) {
+      console.error("❌ Chat error:", error);
+      const errorMessage = error.response?.data?.error || error.message;
       setChatHistory((prev) => [
         ...prev, 
         { 
           question: userQuestion, 
-          answer: "I'm sorry, something went wrong. Please make sure you've uploaded your transaction data first." 
+          answer: `Error: ${errorMessage}\n\nPlease make sure you've uploaded your transaction CSV file first via the Transaction Analyzer page.` 
         }
       ]);
     } finally {

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSimpleAuth } from '@/contexts/SimpleAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const Profile = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, signOut } = useSimpleAuth();
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [avatars, setAvatars] = useState<string[]>([]);
@@ -18,12 +18,12 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name || '');
-      setUsername(profile.username || '');
-      setSelectedAvatar(profile.avatar_url || '');
+    if (user) {
+      setFullName(user.fullName || '');
+      setUsername(user.email.split('@')[0] || '');
+      setSelectedAvatar('/avatars/Aang.jpg'); // Default avatar
     }
-  }, [profile]);
+  }, [user]);
 
   useEffect(() => {
     // Hard-coded list of available avatars
@@ -53,17 +53,20 @@ const Profile = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: fullName,
-          username,
-          avatar_url: selectedAvatar,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+      // For simple auth, just save to localStorage
+      const usersData = localStorage.getItem('snapspend_users');
+      const users = usersData ? JSON.parse(usersData) : {};
+      
+      if (users[user.email]) {
+        users[user.email].fullName = fullName;
+        users[user.email].username = username;
+        users[user.email].avatar = selectedAvatar;
+        localStorage.setItem('snapspend_users', JSON.stringify(users));
         
-      if (error) throw error;
+        // Update current user in localStorage
+        const updatedUser = { ...user, fullName };
+        localStorage.setItem('snapspend_user', JSON.stringify(updatedUser));
+      }
       
       toast.success('Profile updated successfully!');
     } catch (error: any) {
@@ -73,7 +76,7 @@ const Profile = () => {
     }
   };
 
-  if (!user || !profile) {
+  if (!user) {
     return (
       <div className="flex justify-center items-center h-full">
         <p>Please sign in to view your profile.</p>

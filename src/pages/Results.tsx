@@ -6,11 +6,11 @@ import PieChart from "@/components/charts/PieChart";
 import BarChart from "@/components/charts/BarChart";
 import TransactionList from "@/components/TransactionList";
 import { categoryTotals, recentTransactions, monthlySpending, formatCurrency } from "@/lib/demo-data";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSimpleAuth } from "@/contexts/SimpleAuthContext";
 
 const Results = () => {
   const [view, setView] = useState("transactions");
-  const { profile } = useAuth();
+  const { user } = useSimpleAuth();
   
   const totalSpent = categoryTotals.reduce((sum, cat) => sum + cat.total, 0);
   

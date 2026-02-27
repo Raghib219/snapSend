@@ -64,26 +64,40 @@ export default function TransactionAnalyzer() {
     const file = e.target.files?.[0];
     if (!file) return;
     
+    console.log("📁 File selected:", file.name);
     setLoading(true);
     const formData = new FormData();
     formData.append("csvFile", file);
     
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      console.log("🌐 Uploading to:", `${apiUrl}/analyze-transactions`);
+      
       const response = await fetch(`${apiUrl}/analyze-transactions`, {
         method: "POST",
         body: formData,
       });
       
+      console.log("📡 Response status:", response.status);
+      
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        console.error("❌ Upload failed:", errorData);
+        throw new Error(errorData.error || errorData.details || 'Upload failed');
       }
       
       const result = await response.json();
+      console.log("✅ Upload successful, transactions:", result.categorized?.length);
+      
+      if (result.warning) {
+        console.warn("⚠️", result.warning);
+        alert(`⚠️ ${result.warning}\n\nYour transactions have been categorized using basic rules. The app will still work normally!`);
+      }
+      
       setData(result);
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert("Upload failed! Please try again.");
+    } catch (error: any) {
+      console.error('❌ Upload error:', error);
+      alert(`Upload failed: ${error.message}\n\nPlease check:\n1. Backend is running on port 5000\n2. CSV file format is correct\n3. Browser console for details`);
     } finally {
       setLoading(false);
     }
@@ -194,13 +208,21 @@ export default function TransactionAnalyzer() {
                 {loading ? "Analyzing..." : "Upload CSV File"}
               </Button>
               <Button
-                onClick={() => window.location.href = "/sau2"}
+                onClick={() => window.location.href = "/chatbot"}
                 variant="outline"
                 size="lg"
                 className="px-8 py-3"
               >
                 <MessageCircle className="mr-2 h-5 w-5" />
                 Financial Chatbot
+              </Button>
+              <Button
+                onClick={() => window.location.href = "/nudge"}
+                size="lg"
+                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
+              >
+                <Target className="mr-2 h-5 w-5" />
+                Budget Nudge Dashboard
               </Button>
             </div>
           </CardContent>

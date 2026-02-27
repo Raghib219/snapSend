@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, BarChart3, ArrowRight } from "lucide-react";
+import { Upload, BarChart3, ArrowRight, Sparkles, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import { recentTransactions } from "@/lib/demo-data";
 import TransactionList from "@/components/TransactionList";
@@ -26,10 +26,16 @@ const Index = () => {
               Upload CSV
             </Link>
           </Button>
+          <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700">
+            <Link to="/nudge" className="flex items-center">
+              <Target className="mr-2 h-5 w-5" />
+              Budget Nudge
+            </Link>
+          </Button>
           <Button asChild variant="outline" size="lg">
-            <Link to="/insights" className="flex items-center">
-              <BarChart3 className="mr-2 h-5 w-5" />
-              View Insights
+            <Link to="/chatbot" className="flex items-center">
+              <Sparkles className="mr-2 h-5 w-5" />
+              AI Advisor
             </Link>
           </Button>
         </div>
