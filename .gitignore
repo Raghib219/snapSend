@@ -23,5 +23,16 @@ dist-ssr
 *.sln
 *.sw?
 
-# env file
+# env files
 .env
+.env.local
+backend_python/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend_python/venv/
+backend_python/uploads/
