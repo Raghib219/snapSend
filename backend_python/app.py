@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+﻿from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
 import os
@@ -18,15 +18,20 @@ genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
 # Try to initialize model with fallback options
 try:
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-    print("✅ Using Gemini 1.5 Flash Latest")
+    # Use the latest available models
+    model = genai.GenerativeModel('models/gemini-2.5-flash')
+    print("[OK] Using Gemini 2.5 Flash")
 except Exception as e:
     try:
-        model = genai.GenerativeModel('gemini-pro')
-        print("✅ Using Gemini Pro")
+        model = genai.GenerativeModel('models/gemini-flash-latest')
+        print("[OK] Using Gemini Flash Latest")
     except Exception as e2:
-        model = None
-        print(f"⚠️ Could not initialize Gemini model: {e2}")
+        try:
+            model = genai.GenerativeModel('models/gemini-pro-latest')
+            print("[OK] Using Gemini Pro Latest")
+        except Exception as e3:
+            model = None
+            print(f"[WARNING] Could not initialize Gemini model: {e3}")
 
 # Global storage for transactions (in-memory)
 stored_transactions_df = None
@@ -56,12 +61,40 @@ def categorize_transaction_fallback(description):
 def hello():
     return jsonify({'message': 'Hello from Python Flask server! 🐍'})
 
+@app.route('/api/debug-data', methods=['GET'])
+def debug_data():
+    """Debug endpoint to check data status"""
+    global stored_transactions_df
+    return jsonify({
+        'is_none': stored_transactions_df is None,
+        'count': len(stored_transactions_df) if stored_transactions_df is not None else 0,
+        'columns': stored_transactions_df.columns.tolist() if stored_transactions_df is not None else [],
+        'has_category': 'category' in stored_transactions_df.columns if stored_transactions_df is not None else False
+    })
+
+@app.route('/api/check-data', methods=['GET'])
+def check_data():
+    """Check if transaction data is loaded"""
+    global stored_transactions_df
+    if stored_transactions_df is None:
+        return jsonify({
+            'loaded': False,
+            'message': 'No data loaded. Please upload CSV first.',
+            'count': 0
+        })
+    return jsonify({
+        'loaded': True,
+        'message': 'Data is loaded!',
+        'count': len(stored_transactions_df),
+        'categories': stored_transactions_df['category'].unique().tolist() if 'category' in stored_transactions_df.columns else []
+    })
+
 @app.route('/analyze-transactions', methods=['POST'])
 def analyze_transactions():
     global stored_transactions_df
     
     try:
-        print("📁 File upload received")
+        print("[FILE] File upload received")
         
         if 'csvFile' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
@@ -70,7 +103,7 @@ def analyze_transactions():
         
         # Read CSV using pandas
         df = pd.read_csv(file)
-        print(f"✅ Loaded {len(df)} rows from CSV")
+        print(f"[OK] Loaded {len(df)} rows from CSV")
         
         # Normalize column names
         df.columns = df.columns.str.strip()
@@ -112,7 +145,7 @@ def analyze_transactions():
         # Remove NaN amounts
         df = df.dropna(subset=['amount'])
         
-        print(f"📊 Processing {len(df)} valid transactions")
+        print(f"[DATA] Processing {len(df)} valid transactions")
         
         # Try AI categorization first
         using_fallback = False
@@ -120,7 +153,7 @@ def analyze_transactions():
             if model is None:
                 raise ValueError("Gemini model not initialized")
                 
-            print("🤖 Attempting AI categorization with Gemini...")
+            print("[AI] Attempting AI categorization with Gemini...")
             
             # Prepare prompt for Gemini
             transactions_text = "\n".join([
@@ -150,18 +183,20 @@ Transactions:
                 category_map = {item['description']: item['category'] for item in categorized_list}
                 df['category'] = df['description'].map(category_map).fillna('Shopping')
                 
-                print("✅ AI categorization successful")
+                print("[OK] AI categorization successful")
             else:
                 raise ValueError("Invalid JSON response from AI")
                 
         except Exception as e:
-            print(f"⚠️ AI categorization failed: {str(e)}")
-            print("📋 Using rule-based fallback categorization")
+            print(f"[WARN] AI categorization failed: {str(e)}")
+            print("[INFO] Using rule-based fallback categorization")
             using_fallback = True
             df['category'] = df['description'].apply(categorize_transaction_fallback)
         
-        # Store for chatbot use
+        # Store for chatbot use - MUST declare global first!
+        global stored_transactions_df
         stored_transactions_df = df.copy()
+        print(f"[OK] Stored {len(stored_transactions_df)} transactions for chatbot")
         
         # === ANALYTICS USING PANDAS ===
         
@@ -204,7 +239,7 @@ Transactions:
             first_half = expense_df_with_day[expense_df_with_day['day'] <= 15]['amount'].sum()
             second_half = expense_df_with_day[expense_df_with_day['day'] > 15]['amount'].sum()
         except Exception as e:
-            print(f"⚠️ Date parsing warning: {e}")
+            print(f"[WARN] Date parsing warning: {e}")
             # Use default values if date parsing fails
             first_half = total_outflow / 2
             second_half = total_outflow / 2
@@ -215,7 +250,7 @@ Transactions:
             if len(top_3_spends) == 0:
                 top_3_spends = [0, 0, 0]
         except Exception as e:
-            print(f"⚠️ Top spends calculation warning: {e}")
+            print(f"[WARN] Top spends calculation warning: {e}")
             top_3_spends = [0, 0, 0]
         
         # Financial health score
@@ -245,13 +280,13 @@ Give ONE short, actionable financial tip (max 2 sentences). Be friendly and help
                 tip_response = model.generate_content(tip_prompt)
                 ai_tip = tip_response.text.strip()
             except Exception as e:
-                print(f"⚠️ AI tip generation failed: {e}")
+                print(f"[WARN] AI tip generation failed: {e}")
                 pass
         
         # Prepare response
         categorized_transactions = df[['description', 'category', 'amount', 'date']].to_dict('records')
         
-        print(f"✅ Analysis complete - {len(categorized_transactions)} transactions")
+        print(f"[OK] Analysis complete - {len(categorized_transactions)} transactions")
         
         response_data = {
             'categorized': categorized_transactions,
@@ -276,7 +311,7 @@ Give ONE short, actionable financial tip (max 2 sentences). Be friendly and help
         return jsonify(response_data)
         
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"[ERROR] Error: {str(e)}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
@@ -286,7 +321,7 @@ def ask_question():
     global stored_transactions_df
     
     try:
-        print("💬 Chatbot question received")
+        print("[CHAT] AI Chat question received")
         
         data = request.get_json()
         user_question = data.get('question')
@@ -294,50 +329,75 @@ def ask_question():
         if not user_question:
             return jsonify({'error': 'Question is required'}), 400
         
-        if stored_transactions_df is None or len(stored_transactions_df) == 0:
-            return jsonify({'error': 'No transactions available. Upload CSV first.'}), 400
+        print(f"[AI] Processing question: {user_question[:50]}...")
         
-        print(f"📊 Processing question with {len(stored_transactions_df)} transactions")
+        # Check if we have transaction data
+        has_data = stored_transactions_df is not None and len(stored_transactions_df) > 0
         
-        # Build financial summary using pandas
-        income_df = stored_transactions_df[stored_transactions_df['category'] == 'Income']
-        expense_df = stored_transactions_df[stored_transactions_df['category'] != 'Income']
-        
-        total_income = income_df['amount'].sum()
-        total_expenses = expense_df['amount'].sum()
-        
-        # Category breakdown
-        expense_breakdown = expense_df.groupby('category')['amount'].sum().to_dict()
-        
-        breakdown_text = "\n".join([
-            f"- {cat}: ₹{amt:.2f}" for cat, amt in expense_breakdown.items()
-        ])
-        
-        # Create context-aware prompt
-        prompt = f"""You are a friendly financial advisor. Based on this user's financial data:
+        if has_data:
+            print(f"[DATA] Using transaction data with {len(stored_transactions_df)} transactions")
+            
+            # Build financial summary using pandas
+            income_df = stored_transactions_df[stored_transactions_df['category'] == 'Income']
+            expense_df = stored_transactions_df[stored_transactions_df['category'] != 'Income']
+            
+            total_income = income_df['amount'].sum()
+            total_expenses = expense_df['amount'].sum()
+            
+            # Category breakdown
+            expense_breakdown = expense_df.groupby('category')['amount'].sum().to_dict()
+            
+            breakdown_text = "\n".join([
+                f"- {cat}: ₹{amt:.2f}" for cat, amt in expense_breakdown.items()
+            ])
+            
+            # Get top transactions
+            top_expenses = expense_df.nlargest(5, 'amount')[['description', 'amount', 'category']].to_dict('records')
+            top_expenses_text = "\n".join([
+                f"- {exp['description']}: ₹{exp['amount']:.2f} ({exp['category']})" 
+                for exp in top_expenses
+            ])
+            
+            # Create context-aware prompt with user's data
+            prompt = f"""You are a helpful financial advisor for SnapSpend. The user has uploaded their transaction data. Here's their financial summary:
 
-Income: ₹{total_income:.2f}
-Total Expenses: ₹{total_expenses:.2f}
+📊 Financial Overview:
+- Total Income: ₹{total_income:.2f}
+- Total Expenses: ₹{total_expenses:.2f}
+- Net Savings: ₹{(total_income - total_expenses):.2f}
 
-Expense Breakdown:
+💰 Spending by Category:
 {breakdown_text}
+
+🔝 Top 5 Expenses:
+{top_expenses_text}
 
 User Question: "{user_question}"
 
-Provide a helpful, conversational answer. Be supportive and practical. Keep it short (2-3 sentences). Use plain text, no bold or formatting."""
+Provide a helpful, personalized answer based on their actual transaction data. Be specific and reference their spending patterns when relevant. Keep it conversational and actionable (2-4 sentences). Use plain text, no bold or formatting."""
+        else:
+            print("[INFO] No transaction data available, providing general advice")
+            # General financial advice prompt
+            prompt = f"""You are a helpful financial advisor for SnapSpend, a personal finance management app. The user hasn't uploaded their transaction data yet, so provide general financial advice.
+
+User Question: "{user_question}"
+
+Provide helpful financial advice or information. Keep your response concise and practical (2-4 sentences). Focus on actionable financial advice. Use plain text, no bold or formatting."""
         
         if model is None:
-            # Fallback response if AI not available
-            answer = f"Based on your data: You have ₹{total_income:.2f} income and ₹{total_expenses:.2f} expenses. Your top spending category is {list(expense_breakdown.keys())[0] if expense_breakdown else 'unknown'}. Consider reducing expenses in high-spending categories to save more."
+            answer = "I'm currently unable to process your question. Please check if the AI service is properly configured."
         else:
             response = model.generate_content(prompt)
             answer = response.text.strip()
         
-        print("✅ Chatbot response generated")
-        return jsonify({'answer': answer})
+        print("[OK] AI response generated")
+        return jsonify({
+            'answer': answer,
+            'hasData': has_data
+        })
         
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"[ERROR] Error: {str(e)}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Failed to answer question', 'details': str(e)}), 500
@@ -354,14 +414,14 @@ def generate_nudges():
         humorous_messages = {
             'high': [
                 "🚨 BREAKING: Your {category} budget just called 911!",
-                "⚠️ Plot twist: Your wallet is filing for bankruptcy because of {category}!",
+                "[WARN] Plot twist: Your wallet is filing for bankruptcy because of {category}!",
                 "🎭 {category} spending at {percentage}%! Even your bank account is shocked!",
                 "🔥 Your {category} expenses are on fire! And not in a good way!",
                 "💸 Houston, we have a problem! {category} budget is in the danger zone!",
                 "🆘 Your {category} spending needs an intervention. Like, right now!"
             ],
             'medium': [
-                "📊 {category} at {percentage}%. Time to pump the brakes a little!",
+                "[DATA] {category} at {percentage}%. Time to pump the brakes a little!",
                 "💡 Fun fact: You're {percentage}% through your {category} budget!",
                 "⚡ {category} spending is heating up. Cool it down a bit?",
                 "🎯 {category} budget halfway gone. Let's be strategic here!",
@@ -400,7 +460,7 @@ def generate_nudges():
         return jsonify({'nudges': nudges})
         
     except Exception as e:
-        print(f"❌ Error generating nudges: {str(e)}")
+        print(f"[ERROR] Error generating nudges: {str(e)}")
         return jsonify({'error': 'Failed to generate nudges'}), 500
 
 @app.route('/predict-overspending', methods=['POST'])
@@ -453,7 +513,7 @@ def predict_overspending():
             overspend_pct = int(((projected_monthly_spend / total_spent) - 1) * 100)
             warnings.append({
                 'type': 'danger',
-                'message': f"⚠️ At your current pace, you'll spend ₹{int(projected_monthly_spend)} this month! That's {overspend_pct}% more than expected!"
+                'message': f"[WARN] At your current pace, you'll spend ₹{int(projected_monthly_spend)} this month! That's {overspend_pct}% more than expected!"
             })
         
         # Check category-wise overspending
@@ -461,7 +521,7 @@ def predict_overspending():
             if pred['projectedSpend'] > pred['currentSpent'] * 2:
                 warnings.append({
                     'type': 'warning',
-                    'message': f"📊 {pred['category']} spending is accelerating! Projected: ₹{pred['projectedSpend']}"
+                    'message': f"[DATA] {pred['category']} spending is accelerating! Projected: ₹{pred['projectedSpend']}"
                 })
         
         return jsonify({
@@ -475,7 +535,7 @@ def predict_overspending():
         })
         
     except Exception as e:
-        print(f"❌ Error predicting overspending: {str(e)}")
+        print(f"[ERROR] Error predicting overspending: {str(e)}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Failed to predict overspending', 'details': str(e)}), 500
@@ -577,7 +637,7 @@ def suggest_alternatives():
         })
         
     except Exception as e:
-        print(f"❌ Error suggesting alternatives: {str(e)}")
+        print(f"[ERROR] Error suggesting alternatives: {str(e)}")
         return jsonify({'error': 'Failed to suggest alternatives'}), 500
 
 @app.route('/check-achievements', methods=['GET'])
@@ -662,13 +722,104 @@ def check_achievements():
         })
         
     except Exception as e:
-        print(f"❌ Error checking achievements: {str(e)}")
+        print(f"[ERROR] Error checking achievements: {str(e)}")
         return jsonify({'error': 'Failed to check achievements'}), 500
+
+@app.route('/api/recent-transactions', methods=['GET'])
+def get_recent_transactions():
+    """Get recent transactions for dashboard"""
+    global stored_transactions_df
+    
+    try:
+        if stored_transactions_df is None or len(stored_transactions_df) == 0:
+            return jsonify({
+                'transactions': [],
+                'message': 'No data available. Upload CSV first.'
+            })
+        
+        # Get recent transactions (last 10)
+        df = stored_transactions_df.copy()
+        df = df[df['category'] != 'Income']  # Exclude income
+        
+        # Sort by date if possible
+        try:
+            df['date_parsed'] = pd.to_datetime(df['date'], errors='coerce')
+            df = df.sort_values('date_parsed', ascending=False).head(10)
+        except:
+            df = df.head(10)
+        
+        transactions = []
+        for idx, row in df.iterrows():
+            transactions.append({
+                'id': f"tx_{idx}",
+                'date': str(row['date']),
+                'description': row['description'],
+                'amount': float(row['amount']),
+                'category': row['category']
+            })
+        
+        print(f"[OK] Returning {len(transactions)} recent transactions")
+        return jsonify({
+            'transactions': transactions,
+            'count': len(transactions)
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error fetching recent transactions: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Failed to fetch transactions', 'details': str(e)}), 500
+
+@app.route('/api/category-totals', methods=['GET'])
+def get_category_totals():
+    """Get category-wise spending totals"""
+    global stored_transactions_df
+    
+    try:
+        if stored_transactions_df is None or len(stored_transactions_df) == 0:
+            return jsonify({
+                'categories': [],
+                'message': 'No data available. Upload CSV first.'
+            })
+        
+        df = stored_transactions_df.copy()
+        expense_df = df[df['category'] != 'Income']
+        
+        # Calculate category totals
+        category_totals = expense_df.groupby('category')['amount'].sum()
+        total_expenses = category_totals.sum()
+        
+        categories = []
+        colors = ['#64748b', '#475569', '#334155', '#1e293b', '#0f172a', '#94a3b8', '#cbd5e1']
+        
+        for i, (category, total) in enumerate(category_totals.items()):
+            percentage = (total / total_expenses * 100) if total_expenses > 0 else 0
+            categories.append({
+                'category': category,
+                'total': float(total),
+                'percentage': round(percentage, 1),
+                'color': colors[i % len(colors)]
+            })
+        
+        # Sort by total descending
+        categories.sort(key=lambda x: x['total'], reverse=True)
+        
+        print(f"[OK] Returning {len(categories)} category totals")
+        return jsonify({
+            'categories': categories,
+            'totalExpenses': float(total_expenses)
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error fetching category totals: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Failed to fetch category totals', 'details': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
-    print(f"\n🚀 Python Flask server starting on port {port}")
-    print(f"📡 API endpoints:")
+    print(f"\n[START] Python Flask server starting on port {port}")
+    print(f"[API] API endpoints:")
     print(f"   - GET  http://localhost:{port}/api/hello")
     print(f"   - POST http://localhost:{port}/analyze-transactions")
     print(f"   - POST http://localhost:{port}/ask-question")
@@ -676,7 +827,10 @@ if __name__ == '__main__':
     print(f"   - POST http://localhost:{port}/predict-overspending")
     print(f"   - POST http://localhost:{port}/suggest-alternatives")
     print(f"   - GET  http://localhost:{port}/check-achievements")
-    print(f"\n✅ CORS enabled for all origins")
-    print(f"🔑 Gemini API Key: {'✓ Configured' if os.getenv('GEMINI_API_KEY') else '✗ Missing'}\n")
+    print(f"   - GET  http://localhost:{port}/api/recent-transactions")
+    print(f"   - GET  http://localhost:{port}/api/category-totals")
+    print(f"\n[OK] CORS enabled for all origins")
+    print(f"[KEY] Gemini API Key: {'✓ Configured' if os.getenv('GEMINI_API_KEY') else '✗ Missing'}\n")
     
     app.run(debug=True, host='0.0.0.0', port=port)
+
