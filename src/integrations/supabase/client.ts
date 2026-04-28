@@ -1,10 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './types';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Supabase removed - app uses localStorage auth via SimpleAuthContext
+// This stub prevents import errors in any files that still reference it
+export const supabase = {
+  auth: {
+    getSession: async () => ({ data: { session: null }, error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    signInWithPassword: async () => ({ error: { message: 'Use SimpleAuth' } }),
+    signUp: async () => ({ error: { message: 'Use SimpleAuth' } }),
+    signOut: async () => {},
+  },
+  from: () => ({
+    select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }) }) }),
+    insert: () => ({ execute: async () => ({ data: null, error: null }) }),
+  }),
+};

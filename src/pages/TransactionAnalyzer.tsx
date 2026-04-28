@@ -70,10 +70,7 @@ export default function TransactionAnalyzer() {
     formData.append("csvFile", file);
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      console.log("🌐 Uploading to:", `${apiUrl}/analyze-transactions`);
-      
-      const response = await fetch(`${apiUrl}/analyze-transactions`, {
+      const response = await fetch(`/api/analyze-transactions`, {
         method: "POST",
         body: formData,
       });

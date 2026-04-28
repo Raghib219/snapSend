@@ -19,7 +19,7 @@ export default function FinancialChatbot() {
   const [hasData, setHasData] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const apiUrl = "";
 
   // Check if data is loaded on mount
   React.useEffect(() => {
@@ -71,7 +71,7 @@ export default function FinancialChatbot() {
     try {
       console.log("💬 Asking chatbot:", userQuestion);
       
-      const response = await axios.post(`${apiUrl}/ask-question`, {
+      const response = await axios.post(`${apiUrl}/api/ask-question`, {
         question: userQuestion,
       });
 

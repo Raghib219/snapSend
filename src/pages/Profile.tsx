@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useSimpleAuth } from '@/contexts/SimpleAuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';

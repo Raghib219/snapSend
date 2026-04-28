@@ -74,7 +74,7 @@ export default function BudgetNudge() {
   const [financialScore, setFinancialScore] = useState(0);
   const [projectedSpend, setProjectedSpend] = useState(0);
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const apiUrl = "";
 
   const iconMap: any = {
     '🏆': Trophy,
@@ -108,7 +108,7 @@ export default function BudgetNudge() {
 
   const fetchNudges = async () => {
     try {
-      const response = await axios.post(`${apiUrl}/generate-nudges`, {
+      const response = await axios.post(`${apiUrl}/api/generate-nudges`, {
         budgets: budgets.map(b => ({
           category: b.category,
           limit: b.limit,
@@ -123,7 +123,7 @@ export default function BudgetNudge() {
 
   const fetchAchievements = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/check-achievements`);
+      const response = await axios.get(`${apiUrl}/api/check-achievements`);
       const data = response.data;
       
       const mappedAchievements = data.achievements.map((ach: any) => ({
@@ -140,7 +140,7 @@ export default function BudgetNudge() {
 
   const fetchAlternatives = async () => {
     try {
-      const response = await axios.post(`${apiUrl}/suggest-alternatives`);
+      const response = await axios.post(`${apiUrl}/api/suggest-alternatives`);
       setAlternatives(response.data.alternatives || []);
       setTotalMonthlySavings(response.data.totalMonthlySavings || 0);
     } catch (error) {
@@ -150,7 +150,7 @@ export default function BudgetNudge() {
 
   const fetchPredictions = async () => {
     try {
-      const response = await axios.post(`${apiUrl}/predict-overspending`);
+      const response = await axios.post(`${apiUrl}/api/predict-overspending`);
       setPredictions(response.data.predictions || []);
       setProjectedSpend(response.data.projectedMonthlySpend || 0);
       
